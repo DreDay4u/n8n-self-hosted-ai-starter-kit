@@ -1,0 +1,302 @@
+{
+  "createdAt": "2025-02-01T22:49:41.241Z",
+  "updatedAt": "2025-03-23T21:34:30.132Z",
+  "id": "QHtUf3dBQmsNuPa5",
+  "name": "First AI Agent",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "d730cb6a-c6c6-4f67-ad84-bbf7d47f6621",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        60,
+        220
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "2nWeUvJiasxqC4dI",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput }} {{ $json.message.voice.mime_type }}",
+        "options": {
+          "systemMessage": "=As an exceptional personal assistant, anticipate and manage all potential needs by proactively reviewing schedules, databases, and offering relevant follow-up questions.\n# Today is {{$now}}\n# Steps\n\n1. **Review Calendar**: Check upcoming events, meetings, or deadlines. Identify priorities and potential conflicts.\n2. **Analyze Database Information**: Access relevant documents, contact lists, notes, and data that might be required for tasks.\n3. **Provide Reminders and Updates**: Offer timely reminders and updates about important tasks or meetings.\n4. **Initiate Follow-Up Questions**: Pose thoughtful follow-up questions that gather additional needed information or suggest solutions for potential issues.\n\n# Output Format\n\nRespond with a structured plan or list of actions, highlighting necessary tasks, questions, and any additional recommended steps. Provide this in a list format for clarity.\n\n# Examples\n\n**Example 1:**\n\n**Input**: Upcoming business trip next week.\n\n**Output**:\n- Verify flight and hotel reservations.\n- Confirm meeting schedules and attendee details.\n- Check for any presentation or document preparation needs.\n- Follow-Up Questions: \n  - \"Would you like me to arrange transportation to and from the airport?\"\n  - \"Do you need assistance with packing or acquiring travel essentials?\"\n\n**Example 2:**\n\n**Input**: Quarterly team meeting scheduled.\n\n**Output**:\n- Ensure meeting invite has been sent to all attendees.\n- Review past meeting notes for pending agenda items.\n- Suggest topics based on recent project updates.\n- Follow-Up Questions:\n  - \"Should I arrange for catering or refreshments?\"\n  - \"Do you require a briefing on any specific topics?\"\n\n# Notes\n\n- Tailor follow-up questions based on specific situations and preferences.\n- Keep communication concise but comprehensive, ensuring all critical information is covered."
+        }
+      },
+      "id": "02ba091d-9e70-48d2-b140-889eef86fe7e",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        140,
+        0
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "59e78f57-2d6c-489b-9c55-e8985daca25e",
+      "name": "When chat message received",
+      "type": "@n8n/n8n-nodes-langchain.manualChatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -240,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "sessionIdType": "=fromInput",
+        "sessionKey": "",
+        "contextWindowLength": 20
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        240,
+        240
+      ],
+      "id": "686a53d2-4683-4805-8b69-c81c52ddd67c",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "options": {
+          "gl": "us",
+          "google_domain": "google.com",
+          "hl": "en"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolSerpApi",
+      "typeVersion": 1,
+      "position": [
+        400,
+        220
+      ],
+      "id": "0ab4b1f2-e978-4ac8-860d-05a92347892f",
+      "name": "SerpAPI",
+      "credentials": {
+        "serpApi": {
+          "id": "KtCdt82Ia47YcsC2",
+          "name": "SerpAPI account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        -140
+      ],
+      "id": "5f447997-41ae-421c-af97-c1329b910f1c",
+      "name": "When clicking ‘Test workflow’"
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {
+          "download": true,
+          "imageSize": "large"
+        }
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -440,
+        80
+      ],
+      "id": "ed922efe-f519-4588-be4e-af03af152863",
+      "name": "Telegram Trigger",
+      "webhookId": "d58a96af-ed62-42aa-96f1-d81462fa2838",
+      "credentials": {
+        "telegramApi": {
+          "id": "CNeGEndmVitZ5dYS",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "options": {
+          "language": "="
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        -420,
+        300
+      ],
+      "id": "04b1d6bd-611f-4b18-a99a-eb94f97e7563",
+      "name": "OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "2nWeUvJiasxqC4dI",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini-transcribe",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini-transcribe"
+        },
+        "options": {
+          "responseFormat": "text"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -160,
+        260
+      ],
+      "id": "6873b1af-fe6b-4280-923d-c4e7692c1c25",
+      "name": "Transcriber",
+      "credentials": {
+        "openAiApi": {
+          "id": "2nWeUvJiasxqC4dI",
+          "name": "OpenAi account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SerpAPI": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcriber": {
+      "ai_languageModel": [
+        []
+      ]
+    },
+    "OpenAI": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "Telegram Trigger": [
+      {
+        "json": {
+          "update_id": 251697552,
+          "message": {
+            "message_id": 177,
+            "from": {
+              "id": 1071461299,
+              "is_bot": false,
+              "first_name": "Andre",
+              "username": "DreDay4u",
+              "language_code": "en"
+            },
+            "chat": {
+              "id": 1071461299,
+              "first_name": "Andre",
+              "username": "DreDay4u",
+              "type": "private"
+            },
+            "date": 1742744661,
+            "voice": {
+              "duration": 6,
+              "mime_type": "audio/ogg",
+              "file_id": "AwACAgEAAxkBAAOxZ-AsVcuZY9VTn1Eb35QoT4ZQylYAAisEAAISqAABR5mhLDEhHLvtNgQ",
+              "file_unique_id": "AgADKwQAAhKoAAFH",
+              "file_size": 144248
+            }
+          }
+        }
+      }
+    ]
+  },
+  "versionId": "ceba22c4-e9fc-4939-a124-054aef8fa9cc",
+  "triggerCount": 0,
+  "tags": []
+}

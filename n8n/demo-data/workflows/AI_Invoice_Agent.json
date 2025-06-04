@@ -1,0 +1,691 @@
+{
+  "createdAt": "2025-02-01T22:42:46.954Z",
+  "updatedAt": "2025-02-01T22:42:46.954Z",
+  "id": "1upnTN6NxA2pceSM",
+  "name": "AI Invoice Agent",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "simple": false,
+        "filters": {},
+        "options": {
+          "downloadAttachments": true
+        }
+      },
+      "id": "88d2419c-0e02-43ec-8fb3-82e2709ef59e",
+      "name": "Gmail Trigger",
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -560,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "bcabd7f1-8724-4cc5-879b-21a0a0633f57",
+              "leftValue": "={{ $('Gmail Trigger').item.binary }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "c2ef0af2-dc10-4d9b-abd5-877cb990e2e1",
+      "name": "Filter",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        -380,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "messageId": "={{ $json.id }}",
+        "simple": false,
+        "options": {
+          "downloadAttachments": true
+        }
+      },
+      "id": "6d9e6dc1-4ddd-49ab-9d8e-294403cd429e",
+      "name": "Gmail",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        -200,
+        120
+      ],
+      "webhookId": "c28b4620-11ac-4745-8ce6-f023dfa13173"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "attachments",
+        "include": "allOtherFields",
+        "options": {}
+      },
+      "id": "fe21ac2d-f145-4de7-aeb7-93e85fb63235",
+      "name": "Split Out",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        160,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "id": "0d4c9090-a2ff-4f58-9aa9-a129eb030ca7",
+      "name": "Extract from File",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        840,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "inputDataFieldName": "={{ $json.attachments }}",
+        "name": "={{ $('Gmail').item.json.subject }}_{{ $('Merge').item.json.attachments }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1mOJB8mckVnmbISFMpN7o325hI8rCeoDR",
+          "mode": "list",
+          "cachedResultName": "Test attachments",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1mOJB8mckVnmbISFMpN7o325hI8rCeoDR"
+        },
+        "options": {}
+      },
+      "id": "648fbf01-8e16-4cb1-b46f-8370558ec738",
+      "name": "Upload to Google Drive",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        480,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "id": "0edfb221-bbf8-442a-b998-9166535d7e61",
+      "name": "Download Binary Data",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        680,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "133682ea-125f-43d6-bf75-0438824ea092",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        900,
+        460
+      ]
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"invoice_name\": \"Invoice name here\",\n  \"company_name\": \"Company name that sent the invoice\",\n  \"total_invoice_amount\": 1000,\n  \"line_items\": [\n    {\n      \"description\": \"line item description\",\n      \"amount\": 100\n    },\n    {\n      \"description\": \"line item description\",\n      \"amount\": 800\n    },\n    {\n      \"description\": \"line item description\",\n      \"amount\": 100\n    }\n  ]\n}\n"
+      },
+      "id": "15c27358-1bb3-43cb-b862-5b7adff07c63",
+      "name": "Structured Output Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        1060,
+        460
+      ]
+    },
+    {
+      "parameters": {
+        "options": {
+          "reset": false
+        }
+      },
+      "id": "ec962fad-4ea1-48cc-9111-964120c9e0d6",
+      "name": "Loop Over Items",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1820,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appagzmE5u5UC2v7D",
+          "mode": "list",
+          "cachedResultName": "Invoice management",
+          "cachedResultUrl": "https://airtable.com/appagzmE5u5UC2v7D"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblBJrRrhQRdZ360P",
+          "mode": "list",
+          "cachedResultName": "Table 1",
+          "cachedResultUrl": "https://airtable.com/appagzmE5u5UC2v7D/tblBJrRrhQRdZ360P"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "email_subject": "={{ $('Gmail').item.json.headers.subject }}",
+            "email": "={{ $('Gmail').item.json.to.value[0].address }}",
+            "invoice_link": "={{ $('Upload to Google Drive').item.json.webViewLink }}",
+            "amount": "={{ $json.output.total_invoice_amount }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "email_subject",
+              "displayName": "email_subject",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "invoice_link",
+              "displayName": "invoice_link",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "amount",
+              "displayName": "amount",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "7e2e9036-5a8e-470f-9796-1b2389a5f9d2",
+      "name": "Add invoice",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        1340,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appagzmE5u5UC2v7D",
+          "mode": "list",
+          "cachedResultName": "Invoice management",
+          "cachedResultUrl": "https://airtable.com/appagzmE5u5UC2v7D"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblt5IGh6AJgo41ag",
+          "mode": "list",
+          "cachedResultName": "invoice_line_items",
+          "cachedResultUrl": "https://airtable.com/appagzmE5u5UC2v7D/tblt5IGh6AJgo41ag"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "amount": "={{ $json.line_items.amount }}",
+            "line_item": "={{ $json.line_items.description }}",
+            "invoice": "={{ [$json.subject_id] }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "line_item",
+              "displayName": "line_item",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "amount",
+              "displayName": "amount",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "invoice",
+              "displayName": "invoice",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": false
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "7150f200-bda2-4aaa-a51c-6ebc55cb584e",
+      "name": "Airtable1",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        2040,
+        340
+      ]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "line_items",
+        "include": "allOtherFields",
+        "options": {}
+      },
+      "id": "3e6ba73f-e57a-4299-9899-a272c24c7a34",
+      "name": "Split Out1",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        1660,
+        240
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "5c7c5c26-4c66-47c2-abba-6d6d5205ba48",
+      "name": "No Operation, do nothing",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        2020,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e97eab44-68f4-4e8f-930a-29636efab1a5",
+              "name": "attachments",
+              "value": "={{ $('Gmail').item.binary.keys() }}",
+              "type": "array"
+            },
+            {
+              "id": "6f9ba742-3ae1-4c8b-9bed-57da6431032f",
+              "name": "message_id",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ec70e5af-ebbd-4fcc-be93-37af61756322",
+      "name": "Attachment names",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "eeb0920a-9d4c-441c-94a3-9ab6dec3092b",
+              "name": "line_items",
+              "value": "={{ $('Invoice Data Extractor').item.json.output.line_items }}",
+              "type": "array"
+            },
+            {
+              "id": "ff34ba6a-5631-4103-a779-47d2c2012bdb",
+              "name": "subject_id",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "96a0c456-e26b-4965-886d-7a9c925072bb",
+      "name": "Set subject_id",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1500,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "advanced": true,
+        "mergeByFields": {
+          "values": [
+            {
+              "field1": "message_id",
+              "field2": "id"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b8cd6e1b-b5f8-4786-baf5-642bdf9ed027",
+      "name": "Merge",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        320,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You will be provided with text extracted from PDF invoices.\n\nYour task is to extract specific details from the invoices and present them in a structured format. The details to extract are:\n\n1. Invoice Name: The name or identifier of the invoice.\n2. Company Name: The name of the company issuing the invoice.\n3. Total Invoice Amount: The total amount listed on the invoice.\n4. Line Items: The breakdown of charges, including the amount for each line item.\n\nEnsure the extracted details are accurate and present the output in the following JSON format:\n\n{\n  \"invoice_name\": \"Invoice name here\",\n  \"company_name\": \"Company name that sent the invoice\",\n  \"total_invoice_amount\": 1000,\n  \"line_items\": [\n    {\n      \"description\": \"line item description\",\n      \"amount\": 100\n    },\n    {\n      \"description\": \"line item description\",\n      \"amount\": 800\n    },\n    {\n      \"description\": \"line item description\",\n      \"amount\": 100\n    }\n  ]\n}\n\n\n# NOTES\n\nIf any field is missing or ambiguous in the invoice text, provide the best possible approximation or leave the field as null.\n\nLine items should include a descriptive label if available (e.g., \"line_item_1\" can be replaced with \"product_name_1\" or similar).\n\nDouble-check all amounts to ensure consistency between line items and the total invoice amount.\n\nText: {{ $json.text }}",
+        "hasOutputParser": true
+      },
+      "id": "b1dd6a6d-c436-49b0-b2d8-a9e1d81d3848",
+      "name": "Invoice Data Extractor",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.4,
+      "position": [
+        1000,
+        240
+      ]
+    }
+  ],
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail": {
+      "main": [
+        [
+          {
+            "node": "Attachment names",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload to Google Drive": {
+      "main": [
+        [
+          {
+            "node": "Download Binary Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Binary Data": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Invoice Data Extractor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Invoice Data Extractor",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Invoice Data Extractor",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Airtable1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Airtable1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add invoice": {
+      "main": [
+        [
+          {
+            "node": "Set subject_id",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Attachment names": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set subject_id": {
+      "main": [
+        [
+          {
+            "node": "Split Out1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Upload to Google Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Invoice Data Extractor": {
+      "main": [
+        [
+          {
+            "node": "Add invoice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "f559bc1e-eb02-4df4-9be2-4f53fdfc4323",
+  "triggerCount": 0,
+  "tags": []
+}
