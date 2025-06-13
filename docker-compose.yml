@@ -137,3 +137,16 @@ services:
     <<: *init-ollama
     depends_on:
       - ollama-cpu
+
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    command: -H unix:///var/run/docker.sock
+    restart: unless-stopped
+    networks:
+      - letrainai
+    ports:
+      - "9000:9000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
